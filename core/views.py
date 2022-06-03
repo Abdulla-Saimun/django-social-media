@@ -57,6 +57,20 @@ def like_post(request):
         return redirect('/')
 
 @login_required(login_url='signin')
+def profile(request, pk):
+    user_object = User.objects.get(username = pk)
+    user_profile = Profile.objects.get(user = user_object)
+    post = Post.objects.filter(user=pk)
+    post_count = len(post)
+    context = {
+        'user_object': user_object,
+        'user_profile': user_profile,
+        'post_count': post_count,
+        'user_post': post,
+    }
+    return render(request, 'profile.html', context)
+
+@login_required(login_url='signin')
 def settings(request):
     user_profile = Profile.objects.get(user=request.user)
 
@@ -130,7 +144,7 @@ def signin(request):
         if user_login:
             auth.login(request, user_login)
             print('success')
-            return redirect('/')
+            return HttpResponseRedirect('/')
         else:
             print('fail')
             messages.info(request, 'Please enter the right credentials')
