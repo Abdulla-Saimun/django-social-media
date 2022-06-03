@@ -1,7 +1,7 @@
 from turtle import pos
 from urllib.parse import uses_relative
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from .models import Profile, Post, LikePost
 from django.contrib.auth.models import User
 from django.contrib.auth.models import auth
@@ -36,7 +36,25 @@ def upload(request):
 
 @login_required(login_url='signup')
 def like_post(request):
-    pass
+    username = request.user.username
+    post_id = request.GET.get('post_id')
+
+    post = Post.objects.get(id=post_id)
+
+    like_filter = LikePost.objects.filter(post_id=post_id, user_name=username).first()
+    print(like_filter)
+
+    if like_filter == None:
+        new_like = LikePost.objects.create(post_id=post_id, user_name=username)
+        new_like.save()
+        post.no_of_likes = post.no_of_likes+1
+        post.save()
+        return redirect('/')
+    else:
+        like_filter.delete()
+        post.no_of_likes = post.no_of_likes-1
+        post.save()
+        return redirect('/')
 
 @login_required(login_url='signin')
 def settings(request):

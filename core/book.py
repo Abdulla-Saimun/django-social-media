@@ -29,7 +29,7 @@ b2 = Book('Academic Writing', 'collings', '120', 20)
 print(b2.getPrice())
 b2.setDiscount(0.25)
 print(b2.getPrice())
-print(b2._Book__secret)
+
 
 n1 = Newspaper('Prothom', 20, 12)
 print(isinstance(n1, Newspaper))
