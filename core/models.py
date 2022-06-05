@@ -1,5 +1,6 @@
 from ast import BinOp
 from datetime import datetime
+from pyexpat import model
 from tkinter import CASCADE
 import uuid
 from django.db import models
@@ -36,3 +37,11 @@ class LikePost(models.Model):
 
     def __str__(self):
         return self.user_name
+
+
+class FollowerCount(models.Model):
+    follower = models.CharField(max_length=150)
+    user = models.CharField(max_length=150)
+
+    def __str__(self):
+        return f"{self.user} followed by {self.follower}"

@@ -2,11 +2,12 @@ from turtle import pos
 from urllib.parse import uses_relative
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Profile, Post, LikePost
+from .models import Profile, Post, LikePost, FollowerCount
 from django.contrib.auth.models import User
 from django.contrib.auth.models import auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from itertools import chain
 
 
 # Create your views here.
@@ -16,10 +17,43 @@ from django.contrib.auth.decorators import login_required
 def index(request):
     user_object = User.objects.get(username=request.user.username)
     user_profile = Profile.objects.get(user=user_object)
-    post = Post.objects.all().order_by('created_at').reverse()
-    context = {'user_profile': user_profile, 'posts': post}
+    #post = Post.objects.all().order_by('created_at').reverse()
+    # post = Post.objects.exclude(user=request.user.username).order_by('created_at').reverse()
+    user_following_list = list()
+    feed = list()
+    user_following = FollowerCount.objects.filter(follower = request.user.username)
+    for users in user_following:
+        user_following_list.append(users.user)
+    
+    for usernames in user_following_list:
+        feed_lists = Post.objects.filter(user=usernames)
+        feed.append(feed_lists)
+    feed_list = list(chain(*feed))
+    context = {'user_profile': user_profile, 'posts': feed_list}
     return render(request, 'index.html', context)
 
+@login_required(login_url='signin')
+def search(request):
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+
+    if request.method == 'POST':
+        username = request.POST['username']
+        username_object = User.objects.filter(username__icontains=username)
+
+        username_profile = []
+        username_profile_list = []
+
+        for users in username_object:
+            username_profile.append(users.id)
+
+        for ids in username_profile:
+            profile_lists = Profile.objects.filter(id_user=ids)
+            username_profile_list.append(profile_lists)
+        
+        xox = list(chain(*username_profile_list))
+        
+    return render(request, 'search.html', {'user_profile': user_profile, 'username_profile_list': xox})
 
 @login_required(login_url='signin')
 def upload(request):
@@ -57,16 +91,51 @@ def like_post(request):
         return redirect('/')
 
 @login_required(login_url='signin')
+def follow(request):
+    if request.method == "POST":
+        follower = request.POST['followers']
+        user = request.POST['user']
+        print(follower, user)
+
+        if FollowerCount.objects.filter(follower=follower, user=user).first():
+            delete_follower = FollowerCount.objects.get(follower=follower, user=user)
+            delete_follower.delete()
+            return redirect('/profile/'+user)
+        else:
+            new_follower = FollowerCount.objects.create(follower=follower, user=user)
+            new_follower.save()
+            return redirect('/profile/'+user)
+    else:
+        return redirect('/')
+
+@login_required(login_url='signin')
 def profile(request, pk):
     user_object = User.objects.get(username = pk)
     user_profile = Profile.objects.get(user = user_object)
     post = Post.objects.filter(user=pk)
     post_count = len(post)
+
+    follower = request.user.username
+    user = pk 
+    check_following = FollowerCount.objects.filter(follower = follower, user=user).first()
+    follower_count = FollowerCount.objects.filter(user=pk).count()
+    following_count = FollowerCount.objects.filter(follower=pk).count()
+    # print(following_count)
+    if check_following:
+        button_text = "Unfollow"
+    else:
+        button_text = "Follow"
+        #follower_count = FollowerCount.objects.filter(user=pk).count()
+        #print(follower_count)
+
     context = {
         'user_object': user_object,
         'user_profile': user_profile,
         'post_count': post_count,
         'user_post': post,
+        'button_text': button_text,
+        'follower_count': follower_count,
+        "following_count": following_count,
     }
     return render(request, 'profile.html', context)
 
