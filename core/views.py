@@ -39,21 +39,31 @@ def search(request):
 
     if request.method == 'POST':
         username = request.POST['username']
-        username_object = User.objects.filter(username__icontains=username)
+        if username == None:
+            return redirect('/')
+        else:
+            username_object = User.objects.filter(username__icontains=username)
+            print(f"USERNAME: {username_object}")
+            username_profile = []
+            username_profile_list = []
 
-        username_profile = []
-        username_profile_list = []
+            for users in username_object:
+                username_profile.append(users.id)
 
-        for users in username_object:
-            username_profile.append(users.id)
-
-        for ids in username_profile:
-            profile_lists = Profile.objects.filter(id_user=ids)
-            username_profile_list.append(profile_lists)
+            for ids in username_profile:
+                profile_lists = Profile.objects.filter(id_user=ids)
+                username_profile_list.append(profile_lists)
+            print(f"profile: {username_profile}")
+            print(username_profile_list)
+            xox = list(chain(*username_profile_list))
+            
+            
+            #print(xox)
+            return render(request, 'search.html', {'user_profile': user_profile, 'username_profile_list': xox})
         
-        xox = list(chain(*username_profile_list))
+    return redirect('/')
         
-    return render(request, 'search.html', {'user_profile': user_profile, 'username_profile_list': xox})
+   
 
 @login_required(login_url='signin')
 def upload(request):
