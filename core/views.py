@@ -82,7 +82,8 @@ def index(request):
         username_profile_list.append(profile_lists)
 
     suggestions_username_profile_list = list(chain(*username_profile_list))
-    context = {'user_profile': user_profile, 'posts': feed_list, 'suggestions_username_profile_list':suggestions_username_profile_list[:4]}
+    filter_value = 129
+    context = {'user_profile': user_profile, 'posts': feed_list, 'suggestions_username_profile_list':suggestions_username_profile_list[:4], 'filter_value': filter_value}
     return render(request, 'index.html', context)
 
 @login_required(login_url='signin')

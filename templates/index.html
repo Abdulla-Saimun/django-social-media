@@ -48,7 +48,7 @@
                         </div>-->
 
                         <!-- <div class="header_search"> -->
-                            <input type="text" name="username" required placeholder="Search for username..">&nbsp; &nbsp;
+                            <input type="text" name="username" required placeholder="Search for username ..">&nbsp; &nbsp;
                             <button type="submit"><i class="fa fa-search fa-1x"></i></button>
                         <!-- </div> -->
 
@@ -195,6 +195,7 @@
                                 <li><a href="{% url 'profile' user.username %}"> Profile </a> </li>
                                 <li><a href="{% url 'settings' %}"> Account setting </a> </li>
                                 <li><a href="{% url 'logout' %}"> Log Out</a></li>
+                                <li><a href="{% url 'settings' %}"> {{filter_value | add:"100"}} </a> </li>
                             </ul>
                         </div>
 
@@ -308,7 +309,7 @@
                                         <img src="{% static 'assets/images/avatars/avatar-2.jpg' %}" alt="" class="w-6 h-6 rounded-full border-2 border-white  -ml-2">
                                     </div> -->
                                     <div class="">
-                                       <strong>caption: </strong> {{post.caption}}
+                                       <strong>caption: </strong> {{post.caption | capfirst }}
                                     </div>
                                 </div>
 
